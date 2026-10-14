@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import useAuthStore from '../store/useAuthStore';
 import { Utensils } from 'lucide-react';
 
@@ -17,32 +18,34 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Reemplaza esta URL con la URL real de tu API LDAP de clase.
-      // Ejemplo: const response = await axios.post('http://tu-api-ldap.com/login', { username, password });
-      // const { token } = response.data;
-      
-      // -- INICIO SIMULACIÓN (Borrar al integrar API real) --
-      if (username === 'admin' && password === 'admin') {
-         // Generando un token fake para demostración (esto lo debe regresar tu LDAP API)
-         const dummyToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.DummySignature";
-         setToken(dummyToken);
-         navigate('/dashboard');
-      } else {
-         throw new Error('Credenciales inválidas (Usa admin/admin para probar)');
-      }
-      // -- FIN SIMULACIÓN --
+      const params = new URLSearchParams();
+      params.append('grant_type', 'password');
+      params.append('client_id', 'fastapi-api'); // Cliente del laboratorio
+      params.append('username', username);
+      params.append('password', password);
+      params.append('scope', 'openid');
 
-      // Descomenta y ajusta lo siguiente cuando tengas tu API real:
-      /*
+      const response = await axios.post(
+        'http://localhost:8081/realms/cybersecurity/protocol/openid-connect/token',
+        params,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
+      const token = response.data.access_token;
+      
       if (token) {
         setToken(token);
         navigate('/dashboard');
       } else {
-        setError('No se recibió el token');
+        throw new Error('No se recibió el access_token');
       }
-      */
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Error al iniciar sesión');
+      console.error(err);
+      setError(err.response?.data?.error_description || err.response?.data?.error || err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }
