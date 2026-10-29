@@ -13,30 +13,27 @@ Este informe recopila los resultados de la auditoría de seguridad automatizada 
 
 ---
 
-## 🔍 Hallazgos Principales
+## 🔍 Hallazgos Principales (Estado: ✅ Corregidos)
 
-### 1. Detección de Tecnología y Versión
-- **Servidor Web:** Nginx `1.31.6` detectado a través de las cabeceras HTTP de respuesta.
-- **Riesgo:** La exposición explícita de la versión del servidor facilita a un atacante identificar vulnerabilidades específicas de dicha versión.
-- **Recomendación:** Configurar en `nginx.conf`:
-  ```nginx
-  server_tokens off;
-  ```
+### 1. Detección de Tecnología y Versión [RESUELTO]
+- **Servidor Web:** Nginx.
+- **Estado:** ✅ **Corregido**.
+- **Acción:** Se agregó `server_tokens off;` en `nginx.conf` para suprimir la versión del servidor en las cabeceras HTTP de respuesta.
 
-### 2. Cabeceras de Seguridad Faltantes
-Nuclei identificó la ausencia de cabeceras HTTP de seguridad fundamentales para la protección de una Single Page Application (SPA):
+### 2. Cabeceras de Seguridad Faltantes [RESUELTO]
+Se configuraron todas las cabeceras HTTP de seguridad requeridas en `nginx.conf`:
 
-| Cabecera Faltante | Riesgo Asociado | Recomendación |
+| Cabecera Implementada | Configuración Aplicada | Protección Concedida |
 |---|---|---|
-| `X-Frame-Options` | Ataques de Clickjacking | Agregar `X-Frame-Options: SAMEORIGIN` o `DENY` |
-| `X-Content-Type-Options` | Sniffing de tipo MIME | Agregar `X-Content-Type-Options: nosniff` |
-| `Content-Security-Policy (CSP)` | Cross-Site Scripting (XSS) e inyección de datos | Definir directivas estrictas de carga de scripts y estilos |
-| `Strict-Transport-Security (HSTS)` | Ataques Man-In-The-Middle (MITM) | Forzar HTTPS en producción |
-| `Referrer-Policy` | Fuga de URLs y parámetros sensibles en cabeceras referer | Configurar `Referrer-Policy: strict-origin-when-cross-origin` |
-| `Permissions-Policy` | Acceso no autorizado a APIs del navegador (cámara, micro, etc.) | Definir políticas restrictivas |
-| `Cross-Origin-Opener-Policy (COOP)` | Ataques de aislamiento de origen y Spectre | Configurar `same-origin` |
-| `Cross-Origin-Embedder-Policy (COEP)` | Control de recursos embebidos | Configurar `require-corp` |
-| `Cross-Origin-Resource-Policy (CORP)` | Inclusión no autorizada de recursos | Configurar `same-origin` |
+| `X-Frame-Options` | `SAMEORIGIN` | Previene ataques de Clickjacking embebidos |
+| `X-Content-Type-Options` | `nosniff` | Bloquea la suposición de tipo MIME |
+| `Content-Security-Policy (CSP)` | Políticas restrictivas con orígenes permitidos | Mitiga Cross-Site Scripting (XSS) e inyecciones de datos |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Evita fugas de URLs sensibles en peticiones salientes |
+| `Permissions-Policy` | APIs sensibles deshabilitadas (`camera=(), ...`) | Restringe acceso a funciones del dispositivo |
+| `X-Permitted-Cross-Domain-Policies` | `none` | Evita la carga de políticas Flash/PDF externas |
+| `Cross-Origin-Opener-Policy (COOP)` | `same-origin` | Aislamiento de ventana ante fugas de memoria |
+| `Cross-Origin-Resource-Policy (CORP)` | `same-origin` | Control de inclusión de recursos |
+| `Cross-Origin-Embedder-Policy (COEP)` | `unsafe-none` | Permite compatibilidad con assets |
 
 ---
 
